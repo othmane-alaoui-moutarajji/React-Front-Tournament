@@ -1,70 +1,99 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography } from '@mui/material';
+import { Container, Typography, TextField, Button, Card, CardContent } from '@mui/material';
 
-const AddTournamentForm = ({ addTournament }) => {
-  const [tournament, setTournament] = useState({
-    name: '',
-    startDate: '',
-    endDate: '',
-    status: '',
-    groups: 6,
-  });
+function AddTournamentForm() {
+  const [name, setName] = useState('');
+  const [dateDebut, setDateDebut] = useState('');
+  const [dateFin, setDateFin] = useState('');
+  const [status, setStatus] = useState(''); // Ajoutez le statut si nécessaire
+  const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    setTournament({ ...tournament, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    addTournament(tournament);
+
+    try {
+      const response = await fetch('/api/Tournament', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          dateDebut,
+          dateFin,
+          status // Incluez le statut si nécessaire
+        }),
+      });
+
+      if (!response.ok) {
+        // Lire la réponse en texte pour diagnostiquer l'erreur
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const result = await response.json();
+      console.log('Tournament created successfully:', result);
+      // Redirection ou mise à jour de l'interface utilisateur après la création
+    } catch (err) {
+      console.error('Failed to create tournament:', err);
+      setError(err.message);
+    }
   };
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        Add/Edit Tournament
-      </Typography>
-
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Tournament Name"
-          name="name"
-          fullWidth
-          margin="normal"
-          value={tournament.name}
-          onChange={handleChange}
-        />
-        <TextField
-          label="Start Date"
-          name="startDate"
-          fullWidth
-          margin="normal"
-          value={tournament.startDate}
-          onChange={handleChange}
-        />
-        <TextField
-          label="End Date"
-          name="endDate"
-          fullWidth
-          margin="normal"
-          value={tournament.endDate}
-          onChange={handleChange}
-        />
-        <TextField
-          label="Status"
-          name="status"
-          fullWidth
-          margin="normal"
-          value={tournament.status}
-          onChange={handleChange}
-        />
-
-        <Button variant="contained" color="primary" type="submit" style={{ marginTop: '20px' }}>
-          Save Tournament
-        </Button>
-      </form>
+      <Card>
+        <CardContent>
+          <Typography variant="h4" gutterBottom>
+            Create Tournament
+          </Typography>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              label="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+            />
+            <TextField
+              label="Start Date"
+              type="datetime-local"
+              value={dateDebut}
+              onChange={(e) => setDateDebut(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              label="End Date"
+              type="datetime-local"
+              value={dateFin}
+              onChange={(e) => setDateFin(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+            />
+            {/* Ajoutez un champ pour le statut si nécessaire */}
+            {/* <TextField
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              fullWidth
+              required
+              margin="normal"
+            /> */}
+            <Button type="submit" variant="contained" color="primary">
+              Create Tournament
+            </Button>
+            {error && <Typography color="error" gutterBottom>{error}</Typography>}
+          </form>
+        </CardContent>
+      </Card>
     </Container>
   );
-};
+}
 
 export default AddTournamentForm;
