@@ -1,39 +1,41 @@
 import React, { useState } from 'react';
 import { Container, Typography, TextField, Button, Card, CardContent } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function AddTournamentForm() {
   const [name, setName] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
-  const [status, setStatus] = useState(''); // Ajoutez le statut si nécessaire
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await fetch('/api/Tournament', {
+      const response = await fetch('http://localhost:5019/api/Tournament', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token if required
         },
         body: JSON.stringify({
           name,
           dateDebut,
-          dateFin,
-          status // Incluez le statut si nécessaire
+          dateFin
         }),
       });
 
       if (!response.ok) {
-        // Lire la réponse en texte pour diagnostiquer l'erreur
         const errorText = await response.text();
         throw new Error(errorText);
       }
 
       const result = await response.json();
       console.log('Tournament created successfully:', result);
-      // Redirection ou mise à jour de l'interface utilisateur après la création
+
+      // Redirect to the dashboard or another page
+      navigate('/dashboard');
     } catch (err) {
       console.error('Failed to create tournament:', err);
       setError(err.message);
@@ -76,15 +78,6 @@ function AddTournamentForm() {
               margin="normal"
               InputLabelProps={{ shrink: true }}
             />
-            {/* Ajoutez un champ pour le statut si nécessaire */}
-            {/* <TextField
-              label="Status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              fullWidth
-              required
-              margin="normal"
-            /> */}
             <Button type="submit" variant="contained" color="primary">
               Create Tournament
             </Button>

@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { Container, TextField, Button, Grid, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Alert, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function TeamForm() {
   const [teamName, setTeamName] = useState('');
-  const [players, setPlayers] = useState([{ name: '', email: '', isCaptain: false }]);
-  const [site, setSite] = useState(''); // État pour le site d'affectation
+  const [players, setPlayers] = useState([
+    { name: '', email: '', isCaptain: true },  // Capitaine
+    { name: '', email: '', isCaptain: false },
+    { name: '', email: '', isCaptain: false },
+    { name: '', email: '', isCaptain: false },
+    { name: '', email: '', isCaptain: false }
+  ]);
+  const [site, setSite] = useState('Rabat');
   const [openDialog, setOpenDialog] = useState(false);
-  const [openAlert, setOpenAlert] = useState(false); // Pour afficher l'alerte de capitaine
-  const navigate = useNavigate();
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false); // État pour le popup de succès
 
   const handlePlayerChange = (index, field, value) => {
     const updatedPlayers = [...players];
     if (field === 'isCaptain' && value) {
-      // Si on veut faire de ce joueur un capitaine, désigner le joueur en tant que capitaine
       updatedPlayers.forEach((player, i) => {
         if (i !== index) player.isCaptain = false;
       });
@@ -22,40 +26,56 @@ function TeamForm() {
     setPlayers(updatedPlayers);
   };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const teamData = {
+      name: teamName,
+      siteAffectation: site,
+      captain: players[0],
+      player2: players[1],
+      player3: players[2],
+      player4: players[3],
+      player5: players[4],
+      substitute1: players[5] || null,
+      substitute2: players[6] || null,
+      status: 0
+    };
+
+    try {
+      await axios.post('http://localhost:5019/api/Team', teamData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      setOpenSuccessDialog(true); // Ouvre le popup de succès
+    } catch (error) {
+      console.error('Erreur lors de la création de l\'équipe :', error);
+    }
+  };
+
   const addPlayer = () => {
     if (players.length >= 7) {
-      setOpenDialog(true);  // Ouvre le dialogue si le nombre de joueurs est supérieur ou égal à 7
+      setOpenDialog(true);
       return;
     }
     setPlayers([...players, { name: '', email: '', isCaptain: false }]);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Soumission de l'équipe avec les validations
-    if (!site) {
-      alert('Site d\'affectation est obligatoire!');
-      return;
-    }
-    // Ajoutez ici la logique pour soumettre les données de l'équipe
-    navigate('/teams');
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
 
-  const handleCloseAlert = () => {
-    setOpenAlert(false);
+  const handleCloseSuccessDialog = () => {
+    setOpenSuccessDialog(false);
   };
 
   return (
     <Container>
       <Typography variant="h5" gutterBottom>
-        Add New Team
+        Create a New Team
       </Typography>
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField
               label="Team Name"
@@ -68,11 +88,11 @@ function TeamForm() {
 
           <Grid item xs={12}>
             <FormControl fullWidth required>
-              <InputLabel>Site d'affectation</InputLabel>
+              <InputLabel>Site Assignment</InputLabel>
               <Select
                 value={site}
                 onChange={(e) => setSite(e.target.value)}
-                label="Site d'affectation"
+                label="Site Assignment"
               >
                 <MenuItem value="Casa">Casa</MenuItem>
                 <MenuItem value="Rabat">Rabat</MenuItem>
@@ -80,7 +100,6 @@ function TeamForm() {
             </FormControl>
           </Grid>
 
-          {/* Affichage dynamique des joueurs */}
           {players.map((player, index) => (
             <React.Fragment key={index}>
               <Grid item xs={12} sm={4}>
@@ -89,7 +108,7 @@ function TeamForm() {
                   value={player.name}
                   onChange={(e) => handlePlayerChange(index, 'name', e.target.value)}
                   fullWidth
-                  required={index < 7}  // Les 7 premiers joueurs sont obligatoires
+                  required
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -98,46 +117,47 @@ function TeamForm() {
                   value={player.email}
                   onChange={(e) => handlePlayerChange(index, 'email', e.target.value)}
                   fullWidth
-                  required={index < 7}  // Les 7 premiers joueurs sont obligatoires
+                  required
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
                 <Button
                   variant={player.isCaptain ? "contained" : "outlined"}
                   color={player.isCaptain ? "primary" : "default"}
-                  onClick={() => handlePlayerChange(index, 'isCaptain', !player.isCaptain)}
+                  onClick={() => handlePlayerChange(index, 'isCaptain', true)}
                   fullWidth
                 >
-                  {player.isCaptain ? "Captain" : "Make Captain"}
+                  {player.isCaptain ? "Captain" : "Set as Captain"}
                 </Button>
               </Grid>
             </React.Fragment>
           ))}
 
-          <Grid item xs={12}>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={addPlayer}
-              disabled={players.length >= 7}  // Désactive le bouton si 7 joueurs sont déjà ajoutés
-            >
-              Add Another Player
-            </Button>
-          </Grid>
+          {players.length < 7 && (
+            <Grid item xs={12}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={addPlayer}
+                disabled={players.length >= 7}
+              >
+                Add Another Player
+              </Button>
+            </Grid>
+          )}
 
           <Grid item xs={12}>
             <Button type="submit" variant="contained" color="primary">
-              Save Team
+              Create Team
             </Button>
           </Grid>
         </Grid>
       </form>
 
-      {/* Dialogue pour afficher le message lorsque le nombre de joueurs dépasse la limite */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Player Limit Reached</DialogTitle>
         <DialogContent>
-          <Alert severity="info">You can only add up to 7 players. Please remove a player before adding more.</Alert>
+          <Alert severity="info">You have reached the limit of 7 players.</Alert>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="primary">
@@ -146,14 +166,13 @@ function TeamForm() {
         </DialogActions>
       </Dialog>
 
-      {/* Dialogue pour afficher un message lorsque l'utilisateur essaie de désigner plus d'un capitaine */}
-      <Dialog open={openAlert} onClose={handleCloseAlert}>
-        <DialogTitle>Captain Alert</DialogTitle>
+      <Dialog open={openSuccessDialog} onClose={handleCloseSuccessDialog}>
+        <DialogTitle>Success</DialogTitle>
         <DialogContent>
-          <Alert severity="info">Only one player can be designated as captain. The previous captain designation has been removed.</Alert>
+          <Alert severity="success">The team has been created successfully!</Alert>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAlert} color="primary">
+          <Button onClick={handleCloseSuccessDialog} color="primary">
             OK
           </Button>
         </DialogActions>

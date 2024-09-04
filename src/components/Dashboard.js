@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Grid, Card, CardContent, Typography, Button, IconButton } from '@mui/material';
+import { Container, Grid, Card, CardContent, Typography, IconButton, Box, Button, Table, TableBody, TableCell, TableContainer, TableRow, Paper } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout'; // Importer l'icône de déconnexion
 import { useNavigate } from 'react-router-dom';
 
@@ -8,14 +8,12 @@ function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulez une requête API pour obtenir les détails du tournoi
     const fetchTournament = async () => {
       try {
-        // Remplacez par votre appel API réel
-        const response = await fetch('/api/tournament/current');
+        const response = await fetch('http://localhost:5019/api/Tournament/current'); // Appel GET à l'API
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        setTournament(data);
+        setTournament(data); // Stocker les détails du tournoi
       } catch (err) {
         console.error('Failed to fetch tournament:', err);
       }
@@ -24,20 +22,22 @@ function Dashboard() {
     fetchTournament();
   }, []);
 
-  
-
   const handleLogout = () => {
     // Implémentez ici la logique de déconnexion
     console.log('User logged out');
     navigate('/'); // Redirection vers la page de connexion après déconnexion
   };
 
+  const handleEditTournament = () => {
+    navigate('/edit-tournament'); // Redirection vers le formulaire de modification du tournoi
+  };
+
   return (
     <Container>
-      <Grid container alignItems="center" spacing={2}>
+      <Grid container alignItems="center" spacing={2} style={{ marginBottom: '20px' }}>
         <Grid item xs>
           <Typography variant="h4" gutterBottom>
-            Tournament Details
+            Tournament Dashboard
           </Typography>
         </Grid>
         <Grid item>
@@ -47,25 +47,35 @@ function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Affichage des détails du tournoi */}
+      {/* Affichage des détails du tournoi dans un tableau */}
       {tournament ? (
-        <Card sx={{ marginBottom: 3 }}>
+        <Card sx={{ marginBottom: 3, boxShadow: 3, borderRadius: 2 }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
               Tournament Details
             </Typography>
-            <Typography variant="h6" gutterBottom>
-              Name: {tournament.name}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Start Date: {new Date(tournament.startDate).toLocaleDateString()}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              End Date: {new Date(tournament.endDate).toLocaleDateString()}
-            </Typography>
-            <Typography variant="h6" gutterBottom>
-              Status: {tournament.status}
-            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><strong>Name:</strong></TableCell>
+                    <TableCell>{tournament.name}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Start Date:</strong></TableCell>
+                    <TableCell>{new Date(tournament.dateDebut).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>End Date:</strong></TableCell>
+                    <TableCell>{new Date(tournament.dateFin).toLocaleDateString()}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><strong>Status:</strong></TableCell>
+                    <TableCell>{tournament.status || 'N/A'}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </CardContent>
         </Card>
       ) : (
@@ -74,48 +84,59 @@ function Dashboard() {
         </Typography>
       )}
 
-      <Grid container spacing={3}>
+      {/* Sections for total teams, matches, and groups */}
+      <Grid container spacing={3} style={{ marginTop: '20px' }}>
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ padding: 2, boxShadow: 3, borderRadius: 2 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Total Teams
               </Typography>
-              <Typography variant="h2" color="primary">
-                10
+              <Typography variant="h3" color="primary">
+                {tournament ? tournament.totalTeams : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ padding: 2, boxShadow: 3, borderRadius: 2 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Total Matches
               </Typography>
-              <Typography variant="h2" color="secondary">
-                15
+              <Typography variant="h3" color="secondary">
+                {tournament ? tournament.totalMatches : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
 
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ padding: 2, boxShadow: 3, borderRadius: 2 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Total Groups
               </Typography>
-              <Typography variant="h2" color="error">
-                6
+              <Typography variant="h3" color="error">
+                {tournament ? tournament.totalGroups : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      
+      {/* Button to navigate to the edit form */}
+      <Box sx={{ marginTop: '20px', textAlign: 'center' }}>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          onClick={handleEditTournament}
+          sx={{ fontSize: '16px', padding: '10px 20px' }}
+        >
+          Edit Tournament
+        </Button>
+      </Box>
     </Container>
   );
 }
