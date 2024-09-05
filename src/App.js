@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/Login';
 import DashboardLayout from './components/DashboardLayout';
 import Register from './components/Register';
+import TeamList from './components/TeamList'; 
+import EditTeam from './components/EditTeam';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -41,7 +43,11 @@ function App() {
             <Route path="/dashboard/*" element={<DashboardLayout onLogout={handleLogout} />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </>
+          
         )}
+          <Route path="/team-list" element={<TeamList />} />
+          <Route path="/edit-team/:id" element={<EditTeam />} />
+           
       </Routes>
     </Router>
   );
