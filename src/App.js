@@ -5,6 +5,8 @@ import DashboardLayout from './components/DashboardLayout';
 import Register from './components/Register';
 import TeamList from './components/TeamList'; 
 import EditTeam from './components/EditTeam';
+import GroupsList from './components/GroupsList'; 
+import Dashboard from './components/Dashboard';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +49,8 @@ function App() {
         )}
           <Route path="/team-list" element={<TeamList />} />
           <Route path="/edit-team/:id" element={<EditTeam />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/groups/:tournamentId" element={<GroupsList />} />
            
       </Routes>
     </Router>

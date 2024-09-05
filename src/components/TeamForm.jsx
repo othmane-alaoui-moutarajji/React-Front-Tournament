@@ -13,7 +13,9 @@ function TeamForm() {
   ]);
   const [site, setSite] = useState('Rabat');
   const [openDialog, setOpenDialog] = useState(false);
-  const [openSuccessDialog, setOpenSuccessDialog] = useState(false); // État pour le popup de succès
+  const [openSuccessDialog, setOpenSuccessDialog] = useState(false);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false); // État pour le popup d'erreur
+  const [errorMessage, setErrorMessage] = useState(''); // État pour le message d'erreur
 
   const handlePlayerChange = (index, field, value) => {
     const updatedPlayers = [...players];
@@ -49,7 +51,12 @@ function TeamForm() {
       });
       setOpenSuccessDialog(true); // Ouvre le popup de succès
     } catch (error) {
-      console.error('Erreur lors de la création de l\'équipe :', error);
+      if (error.response && error.response.status === 400) {
+        setErrorMessage(error.response.data); // Stocke le message d'erreur
+        setOpenErrorDialog(true); // Ouvre le popup d'erreur
+      } else {
+        console.error('Erreur lors de la création de l\'équipe :', error);
+      }
     }
   };
 
@@ -67,6 +74,10 @@ function TeamForm() {
 
   const handleCloseSuccessDialog = () => {
     setOpenSuccessDialog(false);
+  };
+
+  const handleCloseErrorDialog = () => {
+    setOpenErrorDialog(false);
   };
 
   return (
@@ -173,6 +184,18 @@ function TeamForm() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseSuccessDialog} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openErrorDialog} onClose={handleCloseErrorDialog}>
+        <DialogTitle>Error</DialogTitle>
+        <DialogContent>
+          <Alert severity="error">{errorMessage}</Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseErrorDialog} color="primary">
             OK
           </Button>
         </DialogActions>
