@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Link, Outlet } from 'react-router-dom';
-import { Drawer, List, ListItem, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Box } from '@mui/material';
+import { Drawer, List, ListItem, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Box, IconButton, Menu, MenuItem } from '@mui/material';
 import Dashboard from './Dashboard';
 import TeamList from './TeamList';
 import MatchList from './MatchList';
@@ -8,10 +8,21 @@ import AddTeamForm from './TeamForm';
 import AddTournamentForm from './AddTournamentForm';
 import RecordScores from './RecordScores'; 
 import GroupRankings from './GroupRankings'; 
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const drawerWidth = 240;
 
 function DashboardLayout() {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -20,6 +31,20 @@ function DashboardLayout() {
           <Typography variant="h6" noWrap>
             Tournament Manager Dashboard
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton edge="end" color="inherit" onClick={handleMenuClick}>
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem component={Link} to="/dashboard/matches/group">Group Stage</MenuItem>
+            <MenuItem component={Link} to="/dashboard/matches/quater-final">Quarter-Final</MenuItem>
+            <MenuItem component={Link} to="/dashboard/matches/semi-final">Semi-Final</MenuItem>
+            <MenuItem component={Link} to="/dashboard/matches/final">Final</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 
@@ -40,8 +65,11 @@ function DashboardLayout() {
             <ListItem button component={Link} to="/dashboard/teams">
               <ListItemText primary="Teams" />
             </ListItem>
-            <ListItem button component={Link} to="/dashboard/matches">
+            <ListItem button>
               <ListItemText primary="Matches" />
+              <IconButton onClick={handleMenuClick}>
+                <MoreVertIcon />
+              </IconButton>
             </ListItem>
             <ListItem button component={Link} to="/dashboard/teams/add">
               <ListItemText primary="Add Team" />
@@ -68,12 +96,15 @@ function DashboardLayout() {
           <Route path="/" element={<Dashboard />} />
           <Route path="teams" element={<TeamList />} />
           <Route path="matches" element={<MatchList />} />
+          <Route path="matches/group" element={<MatchList phase="Group" />} />
+          <Route path="matches/quater-final" element={<MatchList phase="Quarter-Final" />} />
+          <Route path="matches/semi-final" element={<MatchList phase="Semi-Final" />} />
+          <Route path="matches/final" element={<MatchList phase="Final" />} />
           <Route path="teams/add" element={<AddTeamForm />} />
           <Route path="tournaments/add" element={<AddTournamentForm />} />
           <Route path="record-scores" element={<RecordScores />} />
           <Route path="group-rankings" element={<GroupRankings />} />
         </Routes>
-        {/* Render child routes */}
         <Outlet />
       </Box>
     </Box>
