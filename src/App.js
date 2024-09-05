@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
-import DashboardLayout from './components/DashboardLayout';
 import Register from './components/Register';
+import DashboardLayout from './components/DashboardLayout';
 import TeamList from './components/TeamList'; 
 import EditTeam from './components/EditTeam';
 import GroupsList from './components/GroupsList'; 
@@ -42,16 +42,16 @@ function App() {
           </>
         ) : (
           <>
+            {/* DashboardLayout handles routes starting with /dashboard */}
             <Route path="/dashboard/*" element={<DashboardLayout onLogout={handleLogout} />} />
             <Route path="/" element={<Navigate to="/dashboard" />} />
           </>
-          
         )}
-          <Route path="/team-list" element={<TeamList />} />
-          <Route path="/edit-team/:id" element={<EditTeam />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* Routes outside of the dashboard layout */}
+        <Route path="/team-list" element={<TeamList />} />
+        <Route path="/edit-team/:id" element={<EditTeam />} />
         <Route path="/groups/:tournamentId" element={<GroupsList />} />
-           
       </Routes>
     </Router>
   );

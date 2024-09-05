@@ -1,13 +1,13 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, Outlet } from 'react-router-dom';
 import { Drawer, List, ListItem, ListItemText, AppBar, Toolbar, Typography, CssBaseline, Box } from '@mui/material';
 import Dashboard from './Dashboard';
 import TeamList from './TeamList';
 import MatchList from './MatchList';
 import AddTeamForm from './TeamForm';
 import AddTournamentForm from './AddTournamentForm';
-import RecordScores from './RecordScores'; // Importer le composant pour enregistrer les scores
-import GroupRankings from './GroupRankings'; // Importer le composant pour afficher les classements des groupes
+import RecordScores from './RecordScores'; 
+import GroupRankings from './GroupRankings'; 
 
 const drawerWidth = 240;
 
@@ -70,9 +70,11 @@ function DashboardLayout() {
           <Route path="matches" element={<MatchList />} />
           <Route path="teams/add" element={<AddTeamForm />} />
           <Route path="tournaments/add" element={<AddTournamentForm />} />
-          <Route path="record-scores" element={<RecordScores />} /> {/* Route pour enregistrer les scores */}
-          <Route path="group-rankings" element={<GroupRankings />} /> {/* Route pour afficher les classements */}
+          <Route path="record-scores" element={<RecordScores />} />
+          <Route path="group-rankings" element={<GroupRankings />} />
         </Routes>
+        {/* Render child routes */}
+        <Outlet />
       </Box>
     </Box>
   );
