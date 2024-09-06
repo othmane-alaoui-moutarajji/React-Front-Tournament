@@ -95,11 +95,7 @@ function DashboardLayout() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="teams" element={<TeamList />} />
-          <Route path="matches" element={<MatchList />} />
-          <Route path="matches/group" element={<MatchList phase="Group" />} />
-          <Route path="matches/quater-final" element={<MatchList phase="Quarter-Final" />} />
-          <Route path="matches/semi-final" element={<MatchList phase="Semi-Final" />} />
-          <Route path="matches/final" element={<MatchList phase="Final" />} />
+          <Route path="matches/:phase" element={<MatchList />} />
           <Route path="teams/add" element={<AddTeamForm />} />
           <Route path="tournaments/add" element={<AddTournamentForm />} />
           <Route path="record-scores" element={<RecordScores />} />

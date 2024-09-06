@@ -1,50 +1,65 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, CircularProgress, List, ListItem, ListItemText } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function MatchList() {
-  const [matches, setMatches] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const matchTypeMap = {
+    0: 'Qualification', // Correspond à MatchType.Qualification
+    1: 'Knockout',      // Correspond à MatchType.Knockout
+    2: 'Final'          // Correspond à MatchType.Final
+};
 
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        // Remplacez par l'appel API réel pour récupérer les matches
-        const response = await fetch('/api/matches');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        setMatches(data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+const MatchList = () => {
+    const [matches, setMatches] = useState([]);
+    const [error, setError] = useState(null);
 
-    fetchMatches();
-  }, []);
+    useEffect(() => {
+        const fetchCurrentTournament = async () => {
+            try {
+                // Appel à l'API pour obtenir l'ID du tournoi actuel
+                const response = await axios.get('http://localhost:5019/api/Tournament/current');
+                const tournamentId = response.data.id; // Assurez-vous que l'ID du tournoi est bien récupéré
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">Error: {error.message}</Typography>;
+                // Appel à l'API pour obtenir les matchs de la phase de groupes pour le tournoi actuel
+                const matchResponse = await axios.get(`http://localhost:5019/api/Tournament/run-group-stage-matches/${tournamentId}`);
+                setMatches(matchResponse.data);
+            } catch (error) {
+                setError('Error fetching current tournament');
+                console.error(error);
+            }
+        };
 
-  return (
-    <Container>
-      <Typography variant="h5" gutterBottom>
-        Match List
-      </Typography>
-      {matches && matches.length > 0 ? (
-        <List>
-          {matches.map((match) => (
-            <ListItem key={match.id}>
-              <ListItemText primary={`Match ${match.id}: ${match.team1} vs ${match.team2}`} />
-            </ListItem>
-          ))}
-        </List>
-      ) : (
-        <Typography>No matches found.</Typography>
-      )}
-    </Container>
-  );
-}
+        fetchCurrentTournament();
+    }, []);
+
+    return (
+        <div className="container mt-4">
+            <h2 className="mb-4">Match List</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <table className="table table-striped">
+                <thead>
+                    <tr>
+                        {/* <th>Match Number</th> */}
+                        <th>Name</th>
+                        {/* <th>Team 1</th>
+                        <th>Team 2</th> */}
+                        <th>Match Type</th>
+                        <th>Scheduled Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {matches.map(match => (
+                        <tr key={match.id}>
+                            {/* <td>{match.matchNumber}</td> */}
+                            <td>{match.name}</td>
+                            {/* <td>{match.team1Name}</td>
+                            <td>{match.team2Name}</td> */}
+                            <td>{matchTypeMap[match.matchType]}</td> {/* Affichage des noms des types de match */}
+                            <td>{match.scheduledDateTime ? new Date(match.scheduledDateTime).toLocaleString() : 'Not Scheduled'}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
 
 export default MatchList;
